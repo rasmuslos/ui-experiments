@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+          content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Scroll</title>
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+
+            font-family: "Comic Sans MS", monospace;
+        }
+        article {
+            display: block;
+            margin: auto;
+
+            overflow-x: hidden;
+            overflow-y: auto;
+            background-color: red;
+
+            width: 500px;
+            height: 500px;
+        }
+        div {
+            height: fit-content;
+        }
+
+        figure {
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <h1>Scroll Experiment</h1>
+    <h2>UNKNOWN</h2>
+
+    <article>
+        <div>
+            <hr>
+        </div>
+    </article>
+
+    <script>
+        const buildComponent = () => {
+            const element = document.createElement("figure")
+            element.innerHTML = `<h1>${Math.random()}</h1>`
+            element.style.color = "#" + ((1<<24)*Math.random() | 0).toString(16)
+
+            return element
+        }
+        const getHeight = element => {
+            const style = element.currentStyle || window.getComputedStyle(element),
+                height = element.offsetHeight, // or use style.width
+                margin = parseFloat(style.marginTop) + parseFloat(style.marginBottom),
+                padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+                border = parseFloat(style.borderBottomWidth) + parseFloat(style.borderTopWidth)
+
+            return height + margin - padding + border
+        }
+
+        let visible
+        let interval
+        let first = true
+
+        window.addEventListener("load", async () => {
+            const article = document.querySelector("article")
+            const div = document.querySelector("div")
+            const hr = document.querySelector("hr")
+            const h2 = document.querySelector("h2")
+
+            const observer = new IntersectionObserver(entities => {
+                entities.forEach(entity => {
+                    visible = entity.isIntersecting
+                    h2.textContent = visible ? "VISIBLE" : "NOT VISIBLE"
+                })
+            })
+            observer.observe(hr)
+
+            interval = setInterval(() => {
+                if(visible) {
+                    for (let i = 0; i < 10; i++) {
+                        const element = buildComponent()
+                        div.insertBefore(element, hr.nextElementSibling)
+
+                        if(first) article.scrollTop = article.scrollHeight
+                        else article.scrollTop += getHeight(element)
+                    }
+                }
+                if(first && !visible) first = false
+
+                const element = buildComponent()
+                div.append(element)
+
+                const height = getHeight(element)
+                if(article.scrollHeight - (article.clientHeight + article.scrollTop + height) < 75) article.scrollTop += height
+            }, 1000)
+        })
+        window.addEventListener("beforeunload", () => clearInterval(interval))
+    </script>
+</body>
+</html>
