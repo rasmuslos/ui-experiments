@@ -76,24 +76,6 @@
 
             box-shadow: inset 0 11px 8px -10px var(--background-secondary), inset 0 -11px 8px -10px var(--background-secondary);
         }
-        /*
-        #wrapper::before, #wrapper::after {
-            position: absolute;
-            left: 0;
-
-            height: 25px;
-            width: 10000px;
-
-            background-color: red;
-            content: "";
-        }
-        #wrapper::before {
-            top: 0;
-        }
-        #wrapper::after {
-            bottom: 0;
-        }
-        */
 
         figure {
             display: grid;
@@ -165,9 +147,10 @@
             padding: 7px 10px;
 
             border: none;
-            margin: 0 0 0 auto;
-
             border-radius: 5px;
+
+            cursor: pointer;
+            margin: 0 0 0 auto;
             background-color: var(--hightlight);
 
             display: grid;
@@ -198,9 +181,9 @@
             </p>
         </div>
         <div id="wrapper">
-            <div id="messages">
-
-            </div>
+            <!--If you want to ensure that older clients get lazy loading too you can replace this with button witch changes into "Loading..."-->
+            <span class="dimmed" id="loading">loading...</span>
+            <div id="messages"></div>
         </div>
         <aside>
             <textarea placeholder="type a message"></textarea>
@@ -247,6 +230,8 @@
         ]
 
         let messages = []
+        let today, holder, wrapper, loading, text, send
+        let timeout, visible, x = 0
 
         const hash = value => {
             let hash = 5381, i = value.length
@@ -254,6 +239,16 @@
 
             return hash >>> 0
         }
+        const getHeight = element => {
+            const style = element.currentStyle || window.getComputedStyle(element),
+                height = element.offsetHeight, // or use style.width
+                margin = parseFloat(style.marginTop) + parseFloat(style.marginBottom),
+                padding = parseFloat(style.paddingTop) + parseFloat(style.paddingBottom),
+                border = parseFloat(style.borderBottomWidth) + parseFloat(style.borderTopWidth)
+
+            return height + margin - padding + border
+        }
+
         const getRandomEntry = array => array[Math.floor(Math.random() * array.length)]
         const generateMessage = () => {
             const name = `${getRandomEntry(firstNames)} ${getRandomEntry(lastNames)}`
@@ -267,13 +262,25 @@
             }
         }
 
-        const renderMessages = holder => {
-            messages.forEach(({ name, message, own, time }) => {
-                const element = document.createElement("figure")
-                const hashed = hash(name)
+        const sendMessage = () => {
+            const message = {
+                name: "Bugs Bunny",
+                message: text.value || "UNKNOWN",
+                own: true,
+                time: new Date().getTime()
+            }
+            text.value = ""
 
-                if(own) element.classList.add("own")
-                element.innerHTML = `
+            messages.push(message)
+            addMessage(message)
+        }
+
+        const addMessage = ({ name, message, own, time }, end = null) => {
+            const element = document.createElement("figure")
+            const hashed = hash(name)
+
+            if(own) element.classList.add("own")
+            element.innerHTML = `
                     <div class="image" style="background: linear-gradient(${hashed % 360}deg, hsl(${hashed % 360}, 95%, 50%), hsl(${hashed + 120 % 360}, 95%, 50%))">
                         <span>${name.split(" ").map(str => str[0]).join("")}</span>
                     </div>
@@ -286,22 +293,49 @@
                         </div>
                     </div>
                 `
+
+            if(!end) {
                 holder.append(element)
-            })
+
+                const height = getHeight(element)
+                if(wrapper.scrollHeight - (wrapper.clientHeight + wrapper.scrollTop + height) < 75) wrapper.scrollTop += height
+            }
+
+            return element
+        }
+        const renderMessages = () => messages.forEach(message => addMessage(message))
+
+        const handleTick = () => {
+            x++
+
+            if(x >= 250) {
+                x = 0
+                addMessage(generateMessage())
+            }
         }
 
         window.addEventListener("load", () => {
-            const today = document.querySelector("#today")
-            const holder = document.querySelector("#messages")
-            const wrapper = document.querySelector("#wrapper")
+            today = document.querySelector("#today")
+            holder = document.querySelector("#messages")
+            wrapper = document.querySelector("#wrapper")
+            loading = document.querySelector("#loading")
+            text = document.querySelector("textarea")
+            send = document.querySelector("button")
 
             for (let i = 0; i < 10; i++) messages.push(generateMessage())
 
             today.textContent = new Date().toDateString()
-            renderMessages(holder)
+            renderMessages()
 
             wrapper.scrollTop = wrapper.scrollHeight
+            interval = setInterval(handleTick, 1)
+
+            send.addEventListener("click", () => sendMessage())
+            text.addEventListener("keyup", event => {
+                if(event.key === "Enter") sendMessage()
+            })
         })
+        window.addEventListener("beforeunload", () => clearInterval(interval))
     </script>
 </body>
 </html>
