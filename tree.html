@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <title>GIT Commit Tree</title>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 50px 100px;
+            
+            font-family: "JetBrains Mono", monospace;
+            
+            color: rgb(209, 209, 209);
+            background-color: rgb(6, 6, 6);
+        }
+        main {
+            display: flex;
+            gap: 45px;
+        }
+        
+        div {
+            position: relative;
+
+            display: flex;
+            flex-direction: column;
+        }
+        div::before {
+            position: absolute;
+            height: calc(100%);
+            width: 1px;
+            content: '';
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <h1>GIT Commit Tree</h1>
+    <main></main>
+    
+    <script>
+        const colors = [/*"#000000", "#7D7D7D", "#CDCDCD", */"#FCF84A", "#FDB60D", "#FC801D", "#FE2857", "#DD1265", "#FF318C", "#FF45ED", "#AF1DF5", "#6B57FF", "#087CFA", "#07C3F2", "#21D789", "#3DEA62"]
+        const branches = [
+        {
+            branch: "master",
+            startIndex: 0,
+            commits: ["initial commit", "fixes", "fixed typo", "noice"]
+        },
+        {
+            branch: "patch-1",
+            startIndex: 3,
+            commits: ["fixes", "welp", "fixed ur mom", "fixed universe"]
+        },
+        {
+            branch: "rework",
+            startIndex: 2,
+            commits: ["rework #47", "help", "switched to svelte"]
+        }
+        ]
+        
+        window.addEventListener("load", async () => {
+            const main = document.querySelector("main")
+            
+            branches.forEach((branch, index) => {
+                const holder = document.createElement("div")
+                holder.style.color = colors[index % colors.length]
+
+                "#".repeat(branch.startIndex).split("#").forEach((_, i) => {
+                    if(i === 0) return
+
+                    const span = document.createElement("span")
+                    span.innerHTML = "&nbsp;"
+
+                    holder.append(span)
+                })
+                branch.commits.forEach(commit => {
+                    const span = document.createElement("span")
+                    span.innerText = commit
+                    
+                    holder.append(span)
+                })
+                
+                main.append(holder)
+            })
+        })
+    </script>
+</body>
+</html>
