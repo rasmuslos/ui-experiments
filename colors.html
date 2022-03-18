@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Colors</title>
+
+    <style>
+        body {
+            color: #F8FAFC;
+            background-color: #060606;
+            font-family: "JetBrains Mono", monospace;
+
+            padding: 50px 100px;
+        }
+        main {
+            display: flex;
+            flex-wrap: wrap;
+
+            gap: 40px;
+            max-width: 1750px;
+        }
+
+        figure {
+            display: flex;
+            flex-direction: column;
+
+            margin: 0;
+
+            justify-content: center;
+            align-items: center;
+        }
+
+        div {
+            position: relative;
+
+            height: 125px;
+            width: 125px;
+
+            border-radius: 5px;
+            margin-bottom: 10px;
+        }
+        div::after {
+            opacity: 0;
+            content: "";
+
+            position: absolute;
+            top: 0;
+            left: 0;
+
+            height: 100%;
+            width: 100%;
+
+            transition: opacity ease 250ms;
+            background-color: rgba(0, 0, 0, 0.3);
+        }
+        div:hover::after {
+            opacity: 1;
+        }
+
+        h2 {
+            transition: transform ease 250ms;
+        }
+        h2:hover {
+            transform: scale(1.1);
+        }
+    </style>
+</head>
+<body>
+    <h1>Colors</h1>
+    <main></main>
+
+    <script>
+        const colors = [
+            "#060606",
+            "#0F172A",
+            "#F8FAFC",
+            "#F1F5F9",
+            "#7D7D7D",
+            "#FCF84A",
+            "#FC801D",
+            "#FE2857",
+            "#7E22CE",
+            "#6B57FF",
+            "#21D789",
+        ]
+
+        window.addEventListener("load", () => {
+            const main = document.querySelector("main")
+
+            colors.forEach(color => {
+                const figure = document.createElement("figure")
+                const div = document.createElement("div")
+                const h2 = document.createElement("h2")
+
+                h2.innerText = color
+                div.style.backgroundColor = color
+
+                figure.append(div, h2)
+                main.append(figure)
+            })
+        })
+        window.addEventListener("click", async ({ target }) => {
+            if(target.nodeName.toLowerCase() != "h2") return
+
+            try {
+                navigator.clipboard.writeText(target.innerText)
+            } catch(error) {
+                alert("Error while copying color to clipboard")
+                console.error("Cannot copy color to clipboard", error)
+            }
+        })
+    </script>
+</body>
+</html>
